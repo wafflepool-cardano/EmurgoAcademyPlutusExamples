@@ -26,6 +26,13 @@ typedDatum22 datum _ _ = traceIfFalse "Not the right datum!" (datum ==  22)
 typedRedeemer11 ::  () -> Integer -> ScriptContext -> Bool
 typedRedeemer11 _ redeemer _ = traceIfFalse "Not the right redeemer!" (redeemer ==  11)
 
+{-# INLINABLE typedRedeemer11 #-}
+typedDatumEqRedeemer :: Integer -> Integer -> ScriptContext
+typedDatumEqRedeemer datum redeemer _
+    | datum == redeemer = True
+    | redeemer == 11    = True
+    | otherwise.        = traceIfFalse "Not the right redeemer" False
+
 ------------------------------------------------------------------------------------------
 -- Custom Types
 ------------------------------------------------------------------------------------------
@@ -54,6 +61,7 @@ customTypedRedeemer11 _ (JOKER boolean) _ =  traceIfFalse "The Joker sais no!" b
 mappedTypedDatum22 :: BuiltinData -> BuiltinData -> BuiltinData -> ()
 mappedTypedDatum22 = wrapValidator customTypedDatum22
 
+
 typedDatum22Val :: PlutusV2.Validator
 typedDatum22Val = PlutusV2.mkValidatorScript $$(PlutusTx.compile [|| mappedTypedDatum22 ||])
 
@@ -63,6 +71,8 @@ mappedTypedRedeemer11 = wrapValidator typedRedeemer11
 typedRedeemer11Val :: Validator
 typedRedeemer11Val = PlutusV2.mkValidatorScript $$(PlutusTx.compile [|| mappedTypedRedeemer11 ||])
 
+wrappedTypedDatumEqRedeemer :: BuiltinData -> BuiltinData -> BuiltinData -> ()
+wrappedTypedDatumEqRedeemer = wrapValidator typedDatumEqRedeemer
 
 -- for custom types
 
@@ -77,6 +87,10 @@ customTypedDatum22Val = PlutusV2.mkValidatorScript $$(PlutusTx.compile [|| mappe
 
 customTypedRedeemer11Val :: Validator
 customTypedRedeemer11Val = PlutusV2.mkValidatorScript $$(PlutusTx.compile [|| mappedCustomTypedRedeemer11 ||])
+
+customTypedDatumEqRedeemerVal :: Validator
+customTypedDatumEqRedeemerVal = PlutusV2.mkValidatorScript $$(PlutusTx.compile [|| wrappedTypedDatumEqRedeemer ||])
+
 
 ------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------
@@ -94,6 +108,9 @@ saveCustomTypedDatum22 =  writeValidatorToFile "./testnet/customTypedDatum22.plu
 
 saveCustomTypedRedeemer11 :: IO ()
 saveCustomTypedRedeemer11 =  writeValidatorToFile "./testnet/customTypedRedeemer11.plutus" customTypedRedeemer11Val
+
+saveCustomTypedDatumEqRedeemer :: IO ()
+saveCustomTypedDatumEqRedeemer =  writeValidatorToFile "./testnet/customTypedDatumEqRedeemer.plutus" customTypedDatumEqRedeemerVal
 
 saveUnit :: IO ()
 saveUnit = writeDataToFile "./testnet/unit.json" ()
